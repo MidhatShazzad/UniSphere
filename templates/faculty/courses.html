@@ -1,0 +1,27 @@
+{% extends "base_sidebar.html" %}
+
+{% block content %}
+<section class="hero">
+    <span class="hero__eyebrow">Faculty Course Index</span>
+    <h1 class="hero__title">Teaching Portfolio</h1>
+    <p class="hero__subtitle">
+        Open any assigned section to manage communication, grading, analytics, attendance, and materials.
+    </p>
+</section>
+
+{% if courses %}
+    <div class="grid three">
+        {% for course in courses %}
+            <a href="/course/{{ course.id }}" class="card card-link">
+                <span class="eyebrow">{{ course.term or "Current term" }}</span>
+                <h3>{{ course.course_code }}</h3>
+                <p>{{ course.course_title }}</p>
+                <p class="muted">{{ course.section_code }} | {{ course.room_no or "Room TBD" }}</p>
+                <p class="muted">{{ course.student_count }} students</p>
+            </a>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">No assigned sections yet.</div>
+{% endif %}
+{% endblock %}

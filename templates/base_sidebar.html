@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UniSphere</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="sidebar">
+        <div class="sidebar__brand">
+            <h2>UniSphere</h2>
+            <p>{{ session.get("role", "guest")|title }}</p>
+        </div>
+
+        {% if session.get("role") == "student" %}
+            <div class="sidebar__section">
+                <span class="sidebar__label">Workspace</span>
+                <a href="/student/dashboard" class="{% if request.path == '/student/dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="/student/courses" class="{% if request.path == '/student/courses' %}active{% endif %}">My Courses</a>
+                <a href="/student/analytics" class="{% if request.path == '/student/analytics' %}active{% endif %}">Analytics</a>
+                <a href="/student/calendar" class="{% if request.path == '/student/calendar' %}active{% endif %}">Calendar</a>
+            </div>
+
+            <div class="sidebar__section">
+                <span class="sidebar__label">Carpool</span>
+                <a href="/student/carpool" class="{% if request.path == '/student/carpool' %}active{% endif %}">Overview</a>
+                <a href="/student/vehicle" class="{% if request.path == '/student/vehicle' %}active{% endif %}">Register Vehicle</a>
+                <a href="/student/create_ride" class="{% if request.path == '/student/create_ride' %}active{% endif %}">Create Ride</a>
+                <a href="/student/rides" class="{% if request.path == '/student/rides' %}active{% endif %}">Find Rides</a>
+            </div>
+        {% endif %}
+
+        {% if session.get("role") == "admin" %}
+            <div class="sidebar__section">
+                <span class="sidebar__label">Administration</span>
+                <a href="/admin/dashboard" class="{% if request.path == '/admin/dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="/admin/users" class="{% if request.path == '/admin/users' %}active{% endif %}">Users</a>
+                <a href="/admin/courses" class="{% if request.path == '/admin/courses' %}active{% endif %}">Courses</a>
+            </div>
+
+            <div class="sidebar__section">
+                <span class="sidebar__label">Operations</span>
+                <a href="/admin/routes" class="{% if request.path == '/admin/routes' %}active{% endif %}">Carpool Routes</a>
+                <a href="/admin/vehicles" class="{% if request.path == '/admin/vehicles' %}active{% endif %}">Vehicle Approvals</a>
+            </div>
+        {% endif %}
+
+        {% if session.get("role") == "faculty" %}
+            <div class="sidebar__section">
+                <span class="sidebar__label">Teaching</span>
+                <a href="/faculty/dashboard" class="{% if request.path == '/faculty/dashboard' %}active{% endif %}">Dashboard</a>
+                <a href="/faculty/courses" class="{% if request.path == '/faculty/courses' %}active{% endif %}">My Courses</a>
+            </div>
+        {% endif %}
+
+        <div class="sidebar__footer">
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="topbar">
+            <div>
+                <span class="topbar__eyebrow">Live Workspace</span>
+                <h3 class="topbar__title">UniSphere Control Surface</h3>
+            </div>
+            <div class="topbar__meta">
+                <div class="user-chip">
+                    <span class="user-chip__dot"></span>
+                    <span>{{ session.get("user", "guest") }}</span>
+                    <span class="muted">{{ session.get("role", "guest")|title }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="content-shell">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

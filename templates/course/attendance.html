@@ -1,0 +1,81 @@
+{% extends "base_sidebar.html" %}
+
+{% block content %}
+<section class="hero">
+    <span class="hero__eyebrow">Attendance Control</span>
+    <h1 class="hero__title">Class Session Tracking</h1>
+    <p class="hero__subtitle">
+        Begin a class session, mark presence, and maintain a visible attendance history for the section.
+    </p>
+</section>
+
+<div class="grid two">
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Session Setup</span>
+                <h2>Begin Class</h2>
+            </div>
+        </div>
+        <form method="POST" action="/course/{{ section_id }}/attendance/submit" class="stack">
+            <div class="grid two">
+                <div>
+                    <label for="held_on">Class Date</label>
+                    <input id="held_on" type="date" name="held_on" required>
+                </div>
+                <div>
+                    <label for="topic">Topic</label>
+                    <input id="topic" name="topic" placeholder="Lecture topic">
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Student ID</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                        <tr>
+                            <td>{{ student.full_name }}</td>
+                            <td>{{ student.student_number }}</td>
+                            <td>
+                                <select name="status_{{ student.id }}">
+                                    <option value="present">Present</option>
+                                    <option value="absent">Absent</option>
+                                </select>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <button type="submit">Submit Attendance</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">History</span>
+                <h2>Recent Sessions</h2>
+            </div>
+        </div>
+        {% if previous_sessions %}
+            <div class="stack">
+                {% for session in previous_sessions %}
+                    <div class="feed-item">
+                        <h3>{{ session.held_on }}</h3>
+                        <p>{{ session.topic or "No topic recorded." }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">No attendance sessions recorded yet.</div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

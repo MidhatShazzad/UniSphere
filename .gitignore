@@ -1,0 +1,18 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# SQLite database
+database/unisphere.db
+
+# Environment files
+.env
+
+# Flask instance folder
+instance/
+
+# OS files
+.DS_Store
+Thumbs.db

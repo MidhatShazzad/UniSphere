@@ -1,0 +1,82 @@
+{% extends "base_sidebar.html" %}
+
+{% block content %}
+<section class="hero">
+    <span class="hero__eyebrow">Faculty Command</span>
+    <h1 class="hero__title">{{ faculty.full_name }}</h1>
+    <p class="hero__subtitle">
+        Manage your sections, keep students aligned, publish updates, track attendance, and monitor performance in one flow.
+    </p>
+    <div class="hero__meta">
+        <div class="hero__meta-item">{{ faculty.faculty_number }}</div>
+        <div class="hero__meta-item">{{ faculty.department or "Department not set" }}</div>
+        <div class="hero__meta-item">{{ faculty.office_location or "Office not set" }}</div>
+    </div>
+</section>
+
+<div class="stats-grid">
+    <div class="stat-tile">
+        <span class="stat-tile__label">Assigned Sections</span>
+        <div class="stat-tile__value">{{ courses|length }}</div>
+        <div class="stat-tile__note">Teaching load in the current term</div>
+    </div>
+    <div class="stat-tile">
+        <span class="stat-tile__label">Recent Updates</span>
+        <div class="stat-tile__value">{{ recent_announcements|length }}</div>
+        <div class="stat-tile__note">Published section announcements</div>
+    </div>
+    <div class="stat-tile">
+        <span class="stat-tile__label">Office Base</span>
+        <div class="stat-tile__value" style="font-size:24px;">{{ faculty.office_location or "TBD" }}</div>
+        <div class="stat-tile__note">Primary working location</div>
+    </div>
+</div>
+
+<div class="grid two">
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Teaching</span>
+                <h2>My Sections</h2>
+            </div>
+            <a href="/faculty/courses">Open course index</a>
+        </div>
+        {% if courses %}
+            <div class="grid">
+                {% for course in courses %}
+                    <a class="card card-link" href="/course/{{ course.id }}">
+                        <h3>{{ course.course_code }}</h3>
+                        <p>{{ course.course_title }}</p>
+                        <p class="muted">{{ course.section_code }} | {{ course.term or "Current term" }}</p>
+                        <p class="muted">{{ course.student_count }} enrolled students</p>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">No sections assigned yet.</div>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Activity</span>
+                <h2>Recent Announcements</h2>
+            </div>
+        </div>
+        {% if recent_announcements %}
+            <div class="stack">
+                {% for announcement in recent_announcements %}
+                    <div class="feed-item">
+                        <p class="muted">{{ announcement.course_code }} | {{ announcement.section_code }}</p>
+                        <h3>{{ announcement.title }}</h3>
+                        <p>{{ announcement.body }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">No section announcements yet.</div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

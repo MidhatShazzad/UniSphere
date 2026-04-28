@@ -1,0 +1,255 @@
+{% extends "base_sidebar.html" %}
+
+{% block content %}
+<section class="hero">
+    <span class="hero__eyebrow">Admin Course Management</span>
+    <h1 class="hero__title">Courses, Sections, and Enrollment</h1>
+    <p class="hero__subtitle">
+        Create sections, assign faculty, shape schedules, place students, and coordinate global academic events from one operational screen.
+    </p>
+</section>
+
+<div class="grid two">
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Create</span>
+                <h2>Create Course Section</h2>
+            </div>
+        </div>
+        <form method="POST" class="stack">
+            <input type="hidden" name="form_type" value="create_section">
+
+            <div>
+                <label for="course_id">Existing Course</label>
+                <select id="course_id" name="course_id">
+                    <option value="">Create a new course below</option>
+                    {% for course in base_courses %}
+                        <option value="{{ course.id }}">{{ course.course_code }} - {{ course.course_title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="grid two">
+                <div>
+                    <label for="course_code">Course Code</label>
+                    <input id="course_code" name="course_code" placeholder="CSE299">
+                </div>
+                <div>
+                    <label for="course_title">Course Title</label>
+                    <input id="course_title" name="course_title" placeholder="Junior Design Lab">
+                </div>
+            </div>
+
+            <div>
+                <label for="description">Description</label>
+                <textarea id="description" name="description"></textarea>
+            </div>
+
+            <div class="grid two">
+                <div>
+                    <label for="section_code">Section</label>
+                    <input id="section_code" name="section_code" placeholder="01" required>
+                </div>
+                <div>
+                    <label for="room_no">Room</label>
+                    <input id="room_no" name="room_no" placeholder="SAC-42">
+                </div>
+            </div>
+
+            <div class="grid two">
+                <div>
+                    <label for="term">Term</label>
+                    <input id="term" name="term" placeholder="Spring 2026">
+                </div>
+                <div>
+                    <label for="faculty_id">Faculty</label>
+                    <select id="faculty_id" name="faculty_id">
+                        <option value="">Unassigned</option>
+                        {% for faculty in faculty_list %}
+                            <option value="{{ faculty.id }}">{{ faculty.full_name }} ({{ faculty.faculty_number }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit">Save Section</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Enrollment and Events</span>
+                <h2>Operational Controls</h2>
+            </div>
+        </div>
+
+        <form method="POST" class="stack">
+            <input type="hidden" name="form_type" value="enroll_student">
+            <div>
+                <label for="student_id">Student</label>
+                <select id="student_id" name="student_id" required>
+                    {% for student in student_list %}
+                        <option value="{{ student.id }}">{{ student.full_name }} ({{ student.student_number }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="section_id">Section</label>
+                <select id="section_id" name="section_id" required>
+                    {% for course in courses %}
+                        <option value="{{ course.section_id }}">{{ course.course_code }} | {{ course.section_code }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit">Enroll Student</button>
+        </form>
+
+        <div style="height:18px;"></div>
+
+        <form method="POST" class="stack">
+            <input type="hidden" name="form_type" value="create_global_event">
+            <div>
+                <label for="title">Global Calendar Event</label>
+                <input id="title" name="title" placeholder="Semester Break" required>
+            </div>
+            <textarea name="description" placeholder="Optional notes"></textarea>
+            <div class="grid two">
+                <select name="event_type">
+                    <option value="holiday">Holiday</option>
+                    <option value="general">General</option>
+                    <option value="presentation">Presentation</option>
+                    <option value="quiz">Quiz</option>
+                    <option value="exam">Exam</option>
+                </select>
+                <input type="date" name="event_date" required>
+            </div>
+            <button type="submit" class="button-accent">Add Event</button>
+        </form>
+    </section>
+</div>
+
+<section class="panel">
+    <div class="section-head">
+        <div>
+            <span class="eyebrow">Sections</span>
+            <h2>Live Section Grid</h2>
+        </div>
+    </div>
+    {% if courses %}
+        <div class="stack">
+            {% for course in courses %}
+                <form method="POST" class="card">
+                    <input type="hidden" name="form_type" value="update_section">
+                    <input type="hidden" name="section_id" value="{{ course.section_id }}">
+                    <div class="section-head">
+                        <div>
+                            <h3>{{ course.course_code }} - {{ course.course_title }}</h3>
+                            <p class="muted">Section {{ course.section_code }} | {{ course.student_count }} enrolled</p>
+                        </div>
+                        <a href="/course/{{ course.section_id }}">Open Section</a>
+                    </div>
+
+                    <div class="grid three">
+                        <div>
+                            <label>Faculty</label>
+                            <select name="faculty_id">
+                                <option value="">Unassigned</option>
+                                {% for faculty in faculty_list %}
+                                    <option value="{{ faculty.id }}" {% if faculty.full_name == course.faculty_name %}selected{% endif %}>
+                                        {{ faculty.full_name }} ({{ faculty.faculty_number }})
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label>Room</label>
+                            <input name="room_no" value="{{ course.room_no or '' }}">
+                        </div>
+                        <div>
+                            <label>Term</label>
+                            <input name="term" value="{{ course.term or '' }}">
+                        </div>
+                    </div>
+
+                    <div style="margin-top:16px;">
+                        <button type="submit">Update Section</button>
+                    </div>
+                </form>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">No sections defined yet.</div>
+    {% endif %}
+</section>
+
+<div class="grid two">
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Enrollment Watch</span>
+                <h2>Student Placement</h2>
+            </div>
+        </div>
+        {% if enrollments %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Section</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for enrollment in enrollments %}
+                        <tr>
+                            <td>{{ enrollment.full_name }} ({{ enrollment.student_number }})</td>
+                            <td>{{ enrollment.course_code }} | {{ enrollment.section_code }}</td>
+                            <td><span class="pill status-{{ enrollment.status }}">{{ enrollment.status }}</span></td>
+                            <td>
+                                {% if enrollment.status == 'enrolled' %}
+                                    <form method="POST">
+                                        <input type="hidden" name="form_type" value="drop_student">
+                                        <input type="hidden" name="student_id" value="{{ enrollment.student_id }}">
+                                        <input type="hidden" name="section_id" value="{{ enrollment.section_id }}">
+                                        <button type="submit" class="button-secondary">Drop</button>
+                                    </form>
+                                {% else %}
+                                    <span class="muted">No action</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">No enrollments yet.</div>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Global Timeline</span>
+                <h2>Academic Events</h2>
+            </div>
+        </div>
+        {% if global_events %}
+            <div class="stack">
+                {% for event in global_events %}
+                    <div class="feed-item">
+                        <span class="pill">{{ event.event_type }}</span>
+                        <h3 style="margin-top:10px;">{{ event.title }}</h3>
+                        <p>{{ event.description or "No description provided." }}</p>
+                        <p class="muted">{{ event.event_date }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">No global events yet.</div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

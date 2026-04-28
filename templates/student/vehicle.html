@@ -1,0 +1,42 @@
+{% extends "base_sidebar.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Vehicle Registration</h1>
+    <p class="muted">One active vehicle profile per student account.</p>
+</div>
+
+<div class="grid two">
+    <section class="panel">
+        <h2>Vehicle Details</h2>
+        <form method="POST" class="stack">
+            <div>
+                <label for="vehicle_reg_no">Registration Number</label>
+                <input id="vehicle_reg_no" name="vehicle_reg_no" value="{{ vehicle.vehicle_reg_no if vehicle else '' }}" required>
+            </div>
+
+            <div>
+                <label for="vehicle_type">Vehicle Type</label>
+                <select id="vehicle_type" name="vehicle_type">
+                    {% for option in ['microbus', '4door', '2door', 'motorcycle'] %}
+                        <option value="{{ option }}" {% if vehicle and vehicle.vehicle_type == option %}selected{% endif %}>{{ option }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit">Save Vehicle</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Approval Status</h2>
+        {% if vehicle %}
+            <p><span class="pill status-{{ vehicle.status }}">{{ vehicle.status }}</span></p>
+            <p class="muted">{{ vehicle.approval_note or "No review note yet." }}</p>
+            <p class="muted">Submitted on {{ vehicle.created_at }}</p>
+        {% else %}
+            <div class="empty-state">No vehicle submitted yet.</div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

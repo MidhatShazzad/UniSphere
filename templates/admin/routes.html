@@ -1,0 +1,69 @@
+{% extends "base_sidebar.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Carpool Routes</h1>
+    <p class="muted">Define available routes and their ordered stops.</p>
+</div>
+
+<div class="grid two">
+    <section class="panel">
+        <h2>Create Route</h2>
+        <form method="POST" class="stack">
+            <input type="hidden" name="form_type" value="create_route">
+            <input name="route_name" placeholder="Campus Loop A" required>
+            <textarea name="description" placeholder="Optional description"></textarea>
+            <button type="submit">Create Route</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Add Stop</h2>
+        <form method="POST" class="stack">
+            <input type="hidden" name="form_type" value="add_stop">
+            <select name="route_id" required>
+                {% for route in routes %}
+                    <option value="{{ route.id }}">{{ route.route_name }}</option>
+                {% endfor %}
+            </select>
+            <input name="stop_name" placeholder="North Gate" required>
+            <input type="number" name="stop_order" min="1" required>
+            <button type="submit">Add Stop</button>
+        </form>
+    </section>
+</div>
+
+<div class="grid two" style="margin-top:20px;">
+    <section class="panel">
+        <h2>Routes</h2>
+        {% if routes %}
+            <div class="stack">
+                {% for route in routes %}
+                    <div class="card">
+                        <h3>{{ route.route_name }}</h3>
+                        <p>{{ route.description or "No description provided." }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">No routes created yet.</div>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <h2>Stops</h2>
+        {% if stops %}
+            <div class="stack">
+                {% for stop in stops %}
+                    <div class="card">
+                        <p><strong>{{ stop.route_name }}</strong></p>
+                        <p>{{ stop.stop_order }}. {{ stop.stop_name }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">No stops added yet.</div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

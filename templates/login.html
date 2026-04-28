@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>UniSphere Login</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}">
+</head>
+<body>
+    <div class="login-shell">
+        <div class="login-card">
+            <div class="login-card__intro">
+                <span class="hero__eyebrow">Academic Command Center</span>
+                <h1 class="hero__title">UniSphere brings courses, coordination, and campus mobility into one system.</h1>
+                <p class="hero__subtitle">
+                    Built for student life, teaching workflows, assessment tracking, calendar visibility, messaging,
+                    attendance, and campus carpool logistics.
+                </p>
+
+                <div class="login-badges">
+                    <div class="login-badge">Role-aware dashboards</div>
+                    <div class="login-badge">Section course workspaces</div>
+                    <div class="login-badge">Calendar + carpool ops</div>
+                </div>
+            </div>
+
+            <div class="login-card__form">
+                <div class="page-header">
+                    <span class="eyebrow">Sign In</span>
+                    <h1>Welcome back</h1>
+                    <p class="muted">Use any seeded demo account to explore the platform.</p>
+                </div>
+
+                {% if error %}
+                    <div class="alert">{{ error }}</div>
+                {% endif %}
+
+                <form method="POST" class="stack" style="margin-top:18px;">
+                    <div>
+                        <label for="username">Username</label>
+                        <input id="username" type="text" name="username" required>
+                    </div>
+
+                    <div>
+                        <label for="password">Password</label>
+                        <input id="password" type="password" name="password" required>
+                    </div>
+
+                    <button type="submit">Enter UniSphere</button>
+                </form>
+
+                <p class="muted" style="margin-top:18px;">
+                    Development mode accepts seeded plain-text passwords, and hashed passwords also work.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,93 @@
+{% extends "base_sidebar.html" %}
+
+{% block content %}
+<section class="hero">
+    <span class="hero__eyebrow">Campus Mobility</span>
+    <h1 class="hero__title">Carpool Command</h1>
+    <p class="hero__subtitle">
+        Register your vehicle, unlock driver approval, and coordinate rides through the campus route network.
+    </p>
+</section>
+
+<div class="stats-grid">
+    <div class="stat-tile">
+        <span class="stat-tile__label">Vehicle Status</span>
+        <div class="stat-tile__value" style="font-size:22px;">{{ vehicle.status|title if vehicle else "None" }}</div>
+        <div class="stat-tile__note">{% if vehicle %}{{ vehicle.vehicle_reg_no }} | {{ vehicle.vehicle_type }}{% else %}No registered vehicle yet{% endif %}</div>
+    </div>
+    <div class="stat-tile">
+        <span class="stat-tile__label">Open Rides</span>
+        <div class="stat-tile__value">{{ open_rides }}</div>
+        <div class="stat-tile__note">Currently visible for booking</div>
+    </div>
+    <div class="stat-tile">
+        <span class="stat-tile__label">Driver Access</span>
+        <div class="stat-tile__value" style="font-size:22px;">
+            {% if vehicle and vehicle.status == 'approved' %}Unlocked{% elif vehicle %}Pending{% else %}Locked{% endif %}
+        </div>
+        <div class="stat-tile__note">Approval gate for creating rides</div>
+    </div>
+</div>
+
+<div class="grid three">
+    <a class="card card-link" href="/student/vehicle">
+        <span class="eyebrow">Step 1</span>
+        <h3>Register Vehicle</h3>
+        <p>Submit or update the ride profile that admin will review.</p>
+    </a>
+    <a class="card card-link" href="/student/create_ride">
+        <span class="eyebrow">Step 2</span>
+        <h3>Create Ride</h3>
+        <p>Offer route-based seats once your vehicle is approved.</p>
+    </a>
+    <a class="card card-link" href="/student/rides">
+        <span class="eyebrow">Step 3</span>
+        <h3>Find Rides</h3>
+        <p>Browse the live pool of available campus trips.</p>
+    </a>
+</div>
+
+<div class="grid two">
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Status Detail</span>
+                <h2>Driver Eligibility</h2>
+            </div>
+        </div>
+        {% if vehicle %}
+            <div class="feed-item">
+                <span class="pill status-{{ vehicle.status }}">{{ vehicle.status }}</span>
+                <h3 style="margin-top:10px;">{{ vehicle.vehicle_reg_no }}</h3>
+                <p>{{ vehicle.vehicle_type }}</p>
+                <p class="muted">{{ vehicle.approval_note or "No admin note yet." }}</p>
+            </div>
+        {% else %}
+            <div class="empty-state">Register a vehicle to start the carpool flow.</div>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">How It Works</span>
+                <h2>Driver Journey</h2>
+            </div>
+        </div>
+        <div class="priority-list">
+            <div class="priority-item">
+                <strong>Register your vehicle</strong>
+                <span>Submit the registration number and vehicle type through the student panel.</span>
+            </div>
+            <div class="priority-item">
+                <strong>Wait for admin review</strong>
+                <span>Vehicle approval is required before ride creation becomes available.</span>
+            </div>
+            <div class="priority-item">
+                <strong>Create or join rides</strong>
+                <span>Approved drivers can offer seats; everyone can browse and join open rides.</span>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

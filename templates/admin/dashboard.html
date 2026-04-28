@@ -1,0 +1,96 @@
+{% extends "base_sidebar.html" %}
+
+{% block content %}
+<section class="hero">
+    <span class="hero__eyebrow">Admin Operations</span>
+    <h1 class="hero__title">System Overview</h1>
+    <p class="hero__subtitle">
+        Monitor users, sections, approvals, announcements, and operational activity from a central academic control layer.
+    </p>
+    <div class="hero__meta">
+        <div class="hero__meta-item">{{ summary.users }} total users</div>
+        <div class="hero__meta-item">{{ summary.sections }} live sections</div>
+        <div class="hero__meta-item">{{ summary.pending_vehicles }} pending vehicle reviews</div>
+    </div>
+</section>
+
+<div class="stats-grid">
+    <div class="stat-tile"><span class="stat-tile__label">Users</span><div class="stat-tile__value">{{ summary.users }}</div></div>
+    <div class="stat-tile"><span class="stat-tile__label">Students</span><div class="stat-tile__value">{{ summary.students }}</div></div>
+    <div class="stat-tile"><span class="stat-tile__label">Faculty</span><div class="stat-tile__value">{{ summary.faculty }}</div></div>
+    <div class="stat-tile"><span class="stat-tile__label">Courses</span><div class="stat-tile__value">{{ summary.courses }}</div></div>
+    <div class="stat-tile"><span class="stat-tile__label">Sections</span><div class="stat-tile__value">{{ summary.sections }}</div></div>
+    <div class="stat-tile"><span class="stat-tile__label">Pending Vehicles</span><div class="stat-tile__value">{{ summary.pending_vehicles }}</div></div>
+</div>
+
+<section class="panel">
+    <div class="section-head">
+        <div>
+            <span class="eyebrow">Course Layer</span>
+            <h2>Recent Sections</h2>
+        </div>
+    </div>
+    {% if recent_sections %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Course</th>
+                    <th>Section</th>
+                    <th>Term</th>
+                    <th>Faculty</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for section in recent_sections %}
+                    <tr>
+                        <td>{{ section.course_code }} - {{ section.course_title }}</td>
+                        <td>{{ section.section_code }}</td>
+                        <td>{{ section.term or "Not set" }}</td>
+                        <td>{{ section.faculty_name or "Unassigned" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="empty-state">No sections created yet.</div>
+    {% endif %}
+</section>
+
+<div class="grid two">
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Broadcast</span>
+                <h2>Global Announcement</h2>
+            </div>
+        </div>
+        <form method="POST" action="/admin/announcements/create" class="stack">
+            <input name="title" placeholder="Announcement title" required>
+            <textarea name="body" placeholder="Write a global update for students and faculty" required></textarea>
+            <button type="submit">Post Announcement</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Feed</span>
+                <h2>Recent Global Announcements</h2>
+            </div>
+        </div>
+        {% if global_announcements %}
+            <div class="stack">
+                {% for announcement in global_announcements %}
+                    <div class="feed-item">
+                        <h3>{{ announcement.title }}</h3>
+                        <p>{{ announcement.body }}</p>
+                        <p class="muted">{{ announcement.author_name }} | {{ announcement.created_at }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">No global announcements yet.</div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

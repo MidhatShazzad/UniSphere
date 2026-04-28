@@ -1,0 +1,38 @@
+{% extends "base_sidebar.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Vehicle Approvals</h1>
+    <p class="muted">Review student vehicle registrations for ride creation access.</p>
+</div>
+
+{% if vehicles %}
+    <div class="stack">
+        {% for vehicle in vehicles %}
+            <div class="panel">
+                <div class="row" style="justify-content:space-between; align-items:flex-start;">
+                    <div>
+                        <h3>{{ vehicle.full_name }} ({{ vehicle.student_number }})</h3>
+                        <p>{{ vehicle.vehicle_reg_no }} · {{ vehicle.vehicle_type }}</p>
+                        <p class="muted">@{{ vehicle.username }}</p>
+                        <p><span class="pill status-{{ vehicle.status }}">{{ vehicle.status }}</span></p>
+                        <p class="muted">{{ vehicle.approval_note or "No review note yet." }}</p>
+                    </div>
+
+                    <form method="POST" action="/admin/vehicles/{{ vehicle.id }}/review" class="stack" style="width:min(320px, 100%);">
+                        <select name="status">
+                            <option value="approved" {% if vehicle.status == 'approved' %}selected{% endif %}>Approved</option>
+                            <option value="pending" {% if vehicle.status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="rejected" {% if vehicle.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                        </select>
+                        <textarea name="approval_note" placeholder="Optional note">{{ vehicle.approval_note or "" }}</textarea>
+                        <button type="submit">Save Review</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">No vehicle submissions yet.</div>
+{% endif %}
+{% endblock %}

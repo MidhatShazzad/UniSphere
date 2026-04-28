@@ -1,0 +1,48 @@
+{% extends "base_sidebar.html" %}
+
+{% block content %}
+<section class="hero">
+    <span class="hero__eyebrow">Ride Marketplace</span>
+    <h1 class="hero__title">Available Campus Rides</h1>
+    <p class="hero__subtitle">
+        Browse open rides, compare available seats, and coordinate shared travel around the university route map.
+    </p>
+</section>
+
+{% if rides %}
+    <div class="grid two">
+        {% for ride in rides %}
+            <div class="card">
+                <div class="section-head">
+                    <div>
+                        <span class="eyebrow">Route</span>
+                        <h3>{{ ride.route_name }}</h3>
+                    </div>
+                    <span class="pill status-open">{{ ride.available_seats }} / {{ ride.total_seats }} seats left</span>
+                </div>
+
+                <p>{{ ride.departure_time }}</p>
+                <p class="muted">Driver: {{ ride.driver_name }}{% if ride.vehicle_type %} | {{ ride.vehicle_type }}{% endif %}</p>
+                <p>{{ ride.comment or "No extra notes." }}</p>
+
+                {% if ride.driver_id == student.id %}
+                    <p class="muted">This is your ride.</p>
+                {% elif ride.id in joined_ride_ids %}
+                    <p class="muted">You already joined this ride.</p>
+                    <form method="POST" action="/student/ride/{{ ride.id }}/cancel">
+                        <button type="submit" class="button-secondary">Cancel Booking</button>
+                    </form>
+                {% elif ride.available_seats > 0 %}
+                    <form method="POST" action="/student/join_ride/{{ ride.id }}">
+                        <button type="submit">Join Ride</button>
+                    </form>
+                {% else %}
+                    <p class="muted">No seats available.</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="empty-state">No open rides yet.</div>
+{% endif %}
+{% endblock %}

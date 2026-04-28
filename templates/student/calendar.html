@@ -1,0 +1,143 @@
+{% extends "base_sidebar.html" %}
+
+{% block content %}
+<section class="hero">
+    <span class="hero__eyebrow">Calendar View</span>
+    <h1 class="hero__title">Academic Timeline</h1>
+    <p class="hero__subtitle">
+        Explore quizzes, exams, presentations, holidays, and general events across your academic schedule.
+    </p>
+</section>
+
+<div class="panel">
+    <div class="section-head">
+        <div>
+            <span class="eyebrow">Navigator</span>
+            <h2 id="month-year" style="margin:0;"></h2>
+        </div>
+        <div class="row">
+            <button type="button" class="button-secondary" onclick="changeMonth(-1)">Previous</button>
+            <button type="button" class="button-secondary" onclick="changeMonth(1)">Next</button>
+        </div>
+    </div>
+
+    <div class="calendar-header" style="display:grid; grid-template-columns:repeat(7, 1fr); gap:8px; margin-top:20px;">
+        {% for day in ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] %}
+            <div class="muted" style="font-weight:bold;">{{ day }}</div>
+        {% endfor %}
+    </div>
+
+    <div id="calendar" style="display:grid; grid-template-columns:repeat(7, 1fr); gap:8px; margin-top:12px;"></div>
+</div>
+
+<div class="grid two">
+    <section class="panel">
+        <h2>Selected Date</h2>
+        <p id="selected-date" class="muted">Pick a date on the calendar.</p>
+        <div id="event-list" class="stack"></div>
+    </section>
+
+    <section class="panel">
+        <h2>Legend</h2>
+        <div class="stack">
+            <div><span class="pill" style="background:#f4c430;">Quiz</span></div>
+            <div><span class="pill" style="background:#f97316; color:white;">Exam</span></div>
+            <div><span class="pill" style="background:#2563eb; color:white;">Presentation</span></div>
+            <div><span class="pill" style="background:#dc2626; color:white;">Holiday</span></div>
+            <div><span class="pill" style="background:#16a34a; color:white;">General</span></div>
+        </div>
+    </section>
+</div>
+
+<script id="calendar-events-data" type="application/json">{{ events | safe }}</script>
+<script>
+const calendarEvents = JSON.parse(
+    document.getElementById("calendar-events-data").textContent
+);
+const calendar = document.getElementById("calendar");
+const monthYear = document.getElementById("month-year");
+const eventListDiv = document.getElementById("event-list");
+const selectedDateText = document.getElementById("selected-date");
+
+const today = new Date();
+const todayString = today.toISOString().slice(0, 10);
+let currentMonth = today.getMonth();
+let currentYear = today.getFullYear();
+
+function renderCalendar(month, year) {
+    calendar.innerHTML = "";
+    monthYear.textContent = new Date(year, month).toLocaleString("en-US", {
+        month: "long",
+        year: "numeric"
+    });
+
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let i = 0; i < firstDay; i++) {
+        const empty = document.createElement("div");
+        calendar.appendChild(empty);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        const dayEvents = calendarEvents.filter(event => event.date === dateStr);
+
+        const cell = document.createElement("button");
+        cell.type = "button";
+        cell.className = "calendar-cell";
+        cell.style.textAlign = "left";
+        cell.innerHTML = `<strong>${day}</strong>`;
+
+        if (dateStr === todayString) {
+            cell.classList.add("is-today");
+        }
+
+        dayEvents.slice(0, 3).forEach(event => {
+            const dot = document.createElement("div");
+            dot.className = "event-bar";
+            dot.style.background = event.color;
+            cell.appendChild(dot);
+        });
+
+        cell.onclick = () => {
+            selectedDateText.textContent = dateStr;
+            eventListDiv.innerHTML = "";
+
+            if (!dayEvents.length) {
+                eventListDiv.innerHTML = `<div class="empty-state">No events on this date.</div>`;
+                return;
+            }
+
+            dayEvents.forEach(event => {
+                const item = document.createElement("div");
+                item.className = "feed-item";
+                item.innerHTML = `
+                    <span class="pill" style="background:${event.color}; color:white;">${event.type}</span>
+                    <h3 style="margin-top:10px;">${event.title}</h3>
+                    <p class="muted">${event.course}</p>
+                    <p>${event.description || "No description provided."}</p>
+                `;
+                eventListDiv.appendChild(item);
+            });
+        };
+
+        calendar.appendChild(cell);
+    }
+}
+
+function changeMonth(offset) {
+    currentMonth += offset;
+    if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear += 1;
+    } else if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear -= 1;
+    }
+    renderCalendar(currentMonth, currentYear);
+}
+
+renderCalendar(currentMonth, currentYear);
+</script>
+{% endblock %}

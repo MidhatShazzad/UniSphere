@@ -1,0 +1,44 @@
+{% extends "base_sidebar.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Create Ride</h1>
+    <p class="muted">Offer a ride on a route managed by the admin team.</p>
+</div>
+
+{% if vehicle %}
+    <div class="panel" style="max-width:720px;">
+        <form method="POST" class="stack">
+            <div>
+                <label for="route_id">Route</label>
+                <select id="route_id" name="route_id" required>
+                    {% for route in routes %}
+                        <option value="{{ route.id }}">{{ route.route_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="departure_time">Departure Time</label>
+                <input id="departure_time" name="departure_time" type="datetime-local" required>
+            </div>
+
+            <div>
+                <label for="available_seats">Available Seats</label>
+                <input id="available_seats" name="available_seats" type="number" min="1" max="20" required>
+            </div>
+
+            <div>
+                <label for="comment">Comment</label>
+                <textarea id="comment" name="comment" placeholder="Optional pickup note or ride context"></textarea>
+            </div>
+
+            <button type="submit">Create Ride</button>
+        </form>
+    </div>
+{% else %}
+    <div class="empty-state">
+        You need an approved vehicle before you can create a ride.
+    </div>
+{% endif %}
+{% endblock %}

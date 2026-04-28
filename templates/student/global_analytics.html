@@ -1,0 +1,166 @@
+{% extends "base_sidebar.html" %}
+
+{% block content %}
+{% set overview = analytics.overview %}
+<section class="hero">
+    <span class="hero__eyebrow">Global Analytics</span>
+    <h1 class="hero__title">{{ student.full_name }} Performance Hub</h1>
+    <p class="hero__subtitle">
+        A cross-course performance view combining grades and attendance into one live academic picture, with focus recommendations and momentum signals.
+    </p>
+    <div class="hero__meta">
+        <div class="hero__meta-item">{{ student.student_number }}</div>
+        <div class="hero__meta-item">{{ student.major or "Major not set" }}</div>
+        <div class="hero__meta-item">{{ analytics.course_breakdown|length }} enrolled sections</div>
+    </div>
+</section>
+
+<div class="ring-grid">
+    <div class="panel ring-card">
+        <span class="eyebrow">Overall</span>
+        <div class="metric-ring" data-score style="--score: {{ overview.final_score | default(0, true) }}; --ring-color: #2563eb;">
+            <div class="metric-ring__value">{{ overview.final_score | default(0, true) }}%</div>
+        </div>
+        <div>
+            <h3>Final Performance</h3>
+            <p class="muted">Weighted from assignments, quizzes, exams, and attendance.</p>
+        </div>
+    </div>
+
+    <div class="panel ring-card">
+        <span class="eyebrow">Consistency</span>
+        <div class="metric-ring" data-score style="--score: {{ analytics.consistency_score | default(0, true) }}; --ring-color: #14b8a6;">
+            <div class="metric-ring__value">{{ analytics.consistency_score | default(0, true) }}%</div>
+        </div>
+        <div>
+            <h3>Consistency Score</h3>
+            <p class="muted">Rewards stable attendance and steady coursework delivery.</p>
+        </div>
+    </div>
+
+    <div class="panel ring-card">
+        <span class="eyebrow">Momentum</span>
+        <div class="metric-ring" data-score style="--score: {{ analytics.momentum_score | default(0, true) }}; --ring-color: #f97316;">
+            <div class="metric-ring__value">{{ analytics.momentum_score | default(0, true) }}%</div>
+        </div>
+        <div>
+            <h3>Momentum Score</h3>
+            <p class="muted">A fast read on whether your current trajectory is strong.</p>
+        </div>
+    </div>
+</div>
+
+
+
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Recommendations</span>
+                <h2>What To Prioritize</h2>
+            </div>
+        </div>
+        <div class="priority-list">
+            {% if analytics.priorities %}
+                {% for item in analytics.priorities %}
+                    <div class="priority-item">
+                        <strong>Focus {{ loop.index }}</strong>
+                        <span>{{ item }}</span>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">No recommendations available yet.</div>
+            {% endif %}
+        </div>
+
+        <div style="height:18px;"></div>
+
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Achievements</span>
+                <h2>Gamified Signals</h2>
+            </div>
+        </div>
+        <div class="achievement-list">
+            {% if analytics.achievements %}
+                {% for item in analytics.achievements %}
+                    <div class="achievement-item">
+                        <strong>{{ item }}</strong>
+                        <span class="muted">Unlocked from your current cross-course pattern.</span>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">No achievements unlocked yet.</div>
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+<div class="grid two">
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Course-Level View</span>
+                <h2>Section Breakdown</h2>
+            </div>
+        </div>
+        {% if analytics.course_breakdown %}
+            <div class="stack">
+                {% for course in analytics.course_breakdown %}
+                    <a href="/course/{{ course.section_id }}" class="card card-link">
+                        <div class="section-head">
+                            <div>
+                                <h3>{{ course.course_code }}</h3>
+                                <p class="muted">{{ course.course_title }} | {{ course.section_code }}</p>
+                            </div>
+                            <span class="pill">{{ course.final_score }}%</span>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-tile">
+                                <span class="stat-tile__label">Assignments</span>
+                                <div class="stat-tile__value" style="font-size:22px;">{{ course.assignment_avg }}%</div>
+                            </div>
+                            <div class="stat-tile">
+                                <span class="stat-tile__label">Quizzes</span>
+                                <div class="stat-tile__value" style="font-size:22px;">{{ course.quiz_avg }}%</div>
+                            </div>
+                            <div class="stat-tile">
+                                <span class="stat-tile__label">Exams</span>
+                                <div class="stat-tile__value" style="font-size:22px;">{{ course.exam_avg }}%</div>
+                            </div>
+                            <div class="stat-tile">
+                                <span class="stat-tile__label">Attendance</span>
+                                <div class="stat-tile__value" style="font-size:22px;">{{ course.attendance }}%</div>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">No enrolled sections available for analytics yet.</div>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Upcoming</span>
+                <h2>What Needs Attention Soon</h2>
+            </div>
+        </div>
+        {% if analytics.upcoming %}
+            <div class="stack">
+                {% for item in analytics.upcoming %}
+                    <div class="feed-item">
+                        <span class="pill">{{ item.assessment_type }}</span>
+                        <h3 style="margin-top:10px;">{{ item.title }}</h3>
+                        <p class="muted">{{ item.course_code }} | {{ item.section_code }}</p>
+                        <p>{{ item.due_at }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">No upcoming dated assessments found.</div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

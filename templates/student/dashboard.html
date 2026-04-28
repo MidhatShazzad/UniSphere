@@ -1,0 +1,105 @@
+{% extends "base_sidebar.html" %}
+
+{% block content %}
+<section class="hero">
+    <span class="hero__eyebrow">Student Workspace</span>
+    <h1 class="hero__title">{{ student.full_name }}</h1>
+    <p class="hero__subtitle">
+        Track your courses, academic updates, section activity, and campus services from one unified dashboard.
+    </p>
+    <div class="hero__meta">
+        <div class="hero__meta-item">{{ student.student_number }}</div>
+        <div class="hero__meta-item">{{ student.major or "Major not set" }}</div>
+        <div class="hero__meta-item">{{ student.intake_term or "Current intake" }}</div>
+    </div>
+</section>
+
+<div class="stats-grid">
+    <div class="stat-tile">
+        <span class="stat-tile__label">Active Courses</span>
+        <div class="stat-tile__value">{{ courses|length }}</div>
+        <div class="stat-tile__note">Sections currently on your schedule</div>
+    </div>
+    <div class="stat-tile">
+        <span class="stat-tile__label">Global Updates</span>
+        <div class="stat-tile__value">{{ global_announcements|length }}</div>
+        <div class="stat-tile__note">Institution-wide announcements</div>
+    </div>
+    <div class="stat-tile">
+        <span class="stat-tile__label">Course Feed</span>
+        <div class="stat-tile__value">{{ course_announcements|length }}</div>
+        <div class="stat-tile__note">Recent section posts</div>
+    </div>
+</div>
+
+<div class="grid two">
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Learning</span>
+                <h2>My Courses</h2>
+            </div>
+            <a href="/student/courses">Open full list</a>
+        </div>
+        {% if courses %}
+            <div class="grid">
+                {% for course in courses %}
+                    <a class="card card-link" href="/course/{{ course.section_id }}">
+                        <h3>{{ course.course_code }}</h3>
+                        <p>{{ course.course_title }}</p>
+                        <p class="muted">{{ course.section_code }} | {{ course.room_no or "Room TBD" }}</p>
+                        <p class="muted">{{ course.faculty_name or "Faculty TBA" }}</p>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">No active enrollments yet.</div>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Broadcasts</span>
+                <h2>Global Announcements</h2>
+            </div>
+        </div>
+        {% if global_announcements %}
+            <div class="stack">
+                {% for announcement in global_announcements %}
+                    <div class="feed-item">
+                        <h3>{{ announcement.title }}</h3>
+                        <p>{{ announcement.body }}</p>
+                        <p class="muted">{{ announcement.author_name }} | {{ announcement.created_at }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">No global announcements yet.</div>
+        {% endif %}
+    </section>
+</div>
+
+<section class="panel">
+    <div class="section-head">
+        <div>
+            <span class="eyebrow">Section Feed</span>
+            <h2>Course Announcements</h2>
+        </div>
+    </div>
+    {% if course_announcements %}
+        <div class="grid two">
+            {% for announcement in course_announcements %}
+                <div class="feed-item">
+                    <p class="muted">{{ announcement.course_code }} | {{ announcement.section_code }}</p>
+                    <h3>{{ announcement.title }}</h3>
+                    <p>{{ announcement.body }}</p>
+                    <p class="muted">{{ announcement.author_name }} | {{ announcement.created_at }}</p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">No course announcements yet.</div>
+    {% endif %}
+</section>
+{% endblock %}

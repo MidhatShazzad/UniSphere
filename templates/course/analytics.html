@@ -1,0 +1,85 @@
+{% extends "base_sidebar.html" %}
+
+{% block content %}
+<section class="hero">
+    <span class="hero__eyebrow">Course Analytics</span>
+    <h1 class="hero__title">{{ section.course_code }} - {{ section.course_title }}</h1>
+    <p class="hero__subtitle">
+        Performance signals for this section, with weighted academic indicators for student and faculty views.
+    </p>
+</section>
+
+{% if metrics %}
+    <div class="ring-grid">
+        <div class="panel ring-card">
+            <span class="eyebrow">Assignments</span>
+            <div class="metric-ring" data-score style="--score: {{ metrics.assignment_avg }}; --ring-color: #2563eb;">
+                <div class="metric-ring__value">{{ metrics.assignment_avg }}%</div>
+            </div>
+        </div>
+        <div class="panel ring-card">
+            <span class="eyebrow">Quizzes</span>
+            <div class="metric-ring" data-score style="--score: {{ metrics.quiz_avg }}; --ring-color: #8b5cf6;">
+                <div class="metric-ring__value">{{ metrics.quiz_avg }}%</div>
+            </div>
+        </div>
+        <div class="panel ring-card">
+            <span class="eyebrow">Exams</span>
+            <div class="metric-ring" data-score style="--score: {{ metrics.exam_avg }}; --ring-color: #f97316;">
+                <div class="metric-ring__value">{{ metrics.exam_avg }}%</div>
+            </div>
+        </div>
+        <div class="panel ring-card">
+            <span class="eyebrow">Attendance</span>
+            <div class="metric-ring" data-score style="--score: {{ metrics.attendance }}; --ring-color: #14b8a6;">
+                <div class="metric-ring__value">{{ metrics.attendance }}%</div>
+            </div>
+        </div>
+        <div class="panel ring-card">
+            <span class="eyebrow">Final Score</span>
+            <div class="metric-ring" data-score style="--score: {{ metrics.final_score }}; --ring-color: #0f172a;">
+                <div class="metric-ring__value">{{ metrics.final_score }}%</div>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <section class="panel">
+        <div class="section-head">
+            <div>
+                <span class="eyebrow">Faculty View</span>
+                <h2>Section Summary</h2>
+            </div>
+        </div>
+        {% if rows %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>ID</th>
+                        <th>Assignments</th>
+                        <th>Quizzes</th>
+                        <th>Exams</th>
+                        <th>Attendance</th>
+                        <th>Final Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in rows %}
+                        <tr>
+                            <td>{{ row.full_name }}</td>
+                            <td>{{ row.student_number }}</td>
+                            <td>{{ row.assignment_avg }}%</td>
+                            <td>{{ row.quiz_avg }}%</td>
+                            <td>{{ row.exam_avg }}%</td>
+                            <td>{{ row.attendance }}%</td>
+                            <td>{{ row.final_score }}%</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">No analytics available yet.</div>
+        {% endif %}
+    </section>
+{% endif %}
+{% endblock %}

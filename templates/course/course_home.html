@@ -1,0 +1,341 @@
+{% extends "base_sidebar.html" %}
+
+{% block content %}
+<section class="hero">
+    <span class="hero__eyebrow">Course Workspace</span>
+    <h1 class="hero__title">{{ section.course_code }} - {{ section.course_title }}</h1>
+    <p class="hero__subtitle">
+        This section workspace brings together announcements, assessments, materials, attendance, analytics, calendar events, and messaging.
+    </p>
+    <div class="hero__meta">
+        <div class="hero__meta-item">{{ section.section_code }}</div>
+        <div class="hero__meta-item">{{ section.term or "Current term" }}</div>
+        <div class="hero__meta-item">{{ section.room_no or "Room TBD" }}</div>
+        {% if section.faculty_name %}
+            <div class="hero__meta-item">{{ section.faculty_name }}</div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="panel">
+    <div class="section-head">
+        <div>
+            <span class="eyebrow">Navigate</span>
+            <h2>Section Modules</h2>
+        </div>
+    </div>
+    <div class="section-nav">
+        <a href="#announcements">Announcements</a>
+        <a href="#calendar-events">Calendar</a>
+        <a href="#assessments">Assessments</a>
+        <a href="#materials">Materials</a>
+        <a href="#inbox">Inbox</a>
+        {% if session.get("role") == "student" %}
+            <a href="#grades">Grades</a>
+            <a href="#performance">Analytics</a>
+        {% else %}
+            <a href="#roster">Roster</a>
+        {% endif %}
+    </div>
+</section>
+
+<div class="grid two">
+    <section class="panel" id="announcements">
+        <h2>Announcements</h2>
+        {% if session.get("role") in ["faculty", "admin"] %}
+            <form method="POST" action="/course/{{ section.id }}/announcement/create" class="stack" style="margin-bottom:18px;">
+                <input name="title" placeholder="Announcement title" required>
+                <textarea name="body" placeholder="Write the update for this section" required></textarea>
+                <button type="submit">Post Announcement</button>
+            </form>
+        {% endif %}
+
+        {% if announcements %}
+            <div class="stack">
+                {% for announcement in announcements %}
+                    <div class="feed-item">
+                        <h3>{{ announcement.title }}</h3>
+                        <p>{{ announcement.body }}</p>
+                        <p class="muted">{{ announcement.author_name }} | {{ announcement.created_at }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">No section announcements yet.</div>
+        {% endif %}
+    </section>
+
+    <section class="panel" id="calendar-events">
+        <h2>Calendar Events</h2>
+        {% if session.get("role") in ["faculty", "admin"] %}
+            <form method="POST" action="/course/{{ section.id }}/calendar/add" class="stack" style="margin-bottom:18px;">
+                <input name="title" placeholder="Quiz 1" required>
+                <textarea name="description" placeholder="Optional event notes"></textarea>
+                <div class="grid two">
+                    <select name="event_type">
+                        <option value="quiz">Quiz</option>
+                        <option value="exam">Exam</option>
+                        <option value="presentation">Presentation</option>
+                        <option value="general">General</option>
+                        <option value="holiday">Holiday</option>
+                    </select>
+                    <input type="date" name="event_date" required>
+                </div>
+                <button type="submit">Add Event</button>
+            </form>
+        {% endif %}
+
+        {% if events %}
+            <div class="stack">
+                {% for event in events %}
+                    <div class="feed-item">
+                        <span class="pill">{{ event.event_type }}</span>
+                        <h3 style="margin-top:10px;">{{ event.title }}</h3>
+                        <p>{{ event.description or "No description provided." }}</p>
+                        <p class="muted">{{ event.event_date }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">No section events yet.</div>
+        {% endif %}
+    </section>
+</div>
+
+<section class="panel" id="assessments">
+    <div class="section-head">
+        <h2>Assessments</h2>
+        {% if session.get("role") == "student" %}
+            <a href="/course/{{ section.id }}/analytics">View My Analytics</a>
+        {% else %}
+            <div class="row">
+                <a href="/course/{{ section.id }}/analytics">Section Analytics</a>
+                <a href="/course/{{ section.id }}/attendance">Attendance</a>
+            </div>
+        {% endif %}
+    </div>
+
+    {% if session.get("role") in ["faculty", "admin"] %}
+        <form method="POST" action="/course/{{ section.id }}/assessment/create" class="stack" style="margin:18px 0;">
+            <div class="grid two">
+                <input name="title" placeholder="Assessment title" required>
+                <select name="assessment_type">
+                    <option value="assignment">Assignment</option>
+                    <option value="quiz">Quiz</option>
+                    <option value="exam">Exam</option>
+                </select>
+            </div>
+            <textarea name="description" placeholder="Assessment instructions"></textarea>
+            <div class="grid two">
+                <input type="datetime-local" name="due_at">
+                <input type="number" name="max_score" min="1" step="0.01" value="100" required>
+            </div>
+            <button type="submit">Create Assessment</button>
+        </form>
+    {% endif %}
+
+    {% if assessments %}
+        <div class="stack">
+            {% for assessment in assessments %}
+                <div class="card">
+                    <div class="section-head">
+                        <div>
+                            <span class="pill">{{ assessment.assessment_type }}</span>
+                            <h3 style="margin-top:10px;">{{ assessment.title }}</h3>
+                            <p>{{ assessment.description or "No description provided." }}</p>
+                            <p class="muted">Due: {{ assessment.due_at or "Not set" }} | Max Score: {{ assessment.max_score }}</p>
+                        </div>
+                        <p class="muted">{{ assessment.submission_count }} submissions</p>
+                    </div>
+
+                    {% if session.get("role") == "student" and assessment.assessment_type == "assignment" %}
+                        <form method="POST" action="/course/{{ section.id }}/assessment/{{ assessment.id }}/submit" class="stack" style="margin-top:16px;">
+                            <input name="file_path" placeholder="Submission file path or reference">
+                            <textarea name="notes" placeholder="Submission note"></textarea>
+                            <button type="submit">
+                                {{ "Update Submission" if submissions_by_assessment.get(assessment.id) else "Submit Assignment" }}
+                            </button>
+                            {% if submissions_by_assessment.get(assessment.id) %}
+                                <p class="muted">Last submitted {{ submissions_by_assessment.get(assessment.id).submitted_at }}</p>
+                            {% endif %}
+                        </form>
+                    {% endif %}
+
+                    {% if session.get("role") == "student" and grades_by_assessment.get(assessment.id) %}
+                        {% set grade = grades_by_assessment.get(assessment.id) %}
+                        <div class="panel" style="margin-top:16px;">
+                            <h3>Your Grade</h3>
+                            <p>{{ grade.score }} / {{ grade.max_score }}</p>
+                            <p class="muted">{{ grade.feedback or "No feedback yet." }}</p>
+                        </div>
+                    {% endif %}
+
+                    {% if session.get("role") in ["faculty", "admin"] %}
+                        <div class="grid two" style="margin-top:16px;">
+                            {% for student in students %}
+                                {% set grade = grades_by_assessment.get(assessment.id, {}).get(student.id) %}
+                                <form method="POST" action="/course/{{ section.id }}/assessment/{{ assessment.id }}/grade" class="panel">
+                                    <input type="hidden" name="student_id" value="{{ student.id }}">
+                                    <h3>{{ student.full_name }}</h3>
+                                    <p class="muted">{{ student.student_number }}</p>
+                                    <input type="number" name="score" min="0" step="0.01" value="{{ grade.score if grade else '' }}" placeholder="Score">
+                                    <textarea name="feedback" placeholder="Feedback">{{ grade.feedback if grade else '' }}</textarea>
+                                    <button type="submit">Save Grade</button>
+                                </form>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">No assessments created yet.</div>
+    {% endif %}
+</section>
+
+<div class="grid two">
+    <section class="panel" id="materials">
+        <h2>Materials</h2>
+        {% if session.get("role") in ["faculty", "admin"] %}
+            <form method="POST" action="/course/{{ section.id }}/material/create" class="stack" style="margin-bottom:18px;">
+                <input name="title" placeholder="Material title" required>
+                <textarea name="description" placeholder="What is this resource for?"></textarea>
+                <input name="file_path" placeholder="File path or resource link">
+                <button type="submit">Add Material</button>
+            </form>
+        {% endif %}
+
+        {% if materials %}
+            <div class="stack">
+                {% for material in materials %}
+                    <div class="feed-item">
+                        <h3>{{ material.title }}</h3>
+                        <p>{{ material.description or "No description provided." }}</p>
+                        <p class="muted">{{ material.file_path or "No file path attached." }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">No materials uploaded yet.</div>
+        {% endif %}
+    </section>
+
+    <section class="panel" id="inbox">
+        <h2>Inbox</h2>
+        <form method="POST" action="/course/{{ section.id }}/message" class="stack" style="margin-bottom:18px;">
+            <textarea name="message" placeholder="Write a section message" required></textarea>
+            <button type="submit">Send Message</button>
+        </form>
+
+        {% if messages %}
+            <div class="stack">
+                {% for message in messages %}
+                    <div class="message-bubble">
+                        <p>{{ message.body }}</p>
+                        <p class="muted">{{ message.sender_name }} | {{ message.sent_at }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">No messages in this section yet.</div>
+        {% endif %}
+    </section>
+</div>
+
+{% if session.get("role") in ["faculty", "admin"] and submissions %}
+    <section class="panel">
+        <h2>Recent Submissions</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Assessment</th>
+                    <th>Submitted</th>
+                    <th>File</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for submission in submissions %}
+                    <tr>
+                        <td>{{ submission.full_name }} ({{ submission.student_number }})</td>
+                        <td>{{ submission.assessment_title }}</td>
+                        <td>{{ submission.submitted_at }}</td>
+                        <td>{{ submission.file_path or "-" }}</td>
+                        <td>{{ submission.notes or "-" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+{% endif %}
+
+{% if session.get("role") == "student" %}
+    <section class="panel" id="grades">
+        <h2>Grades</h2>
+        {% if student_grades %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Assessment</th>
+                        <th>Type</th>
+                        <th>Score</th>
+                        <th>Feedback</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for grade in student_grades %}
+                        <tr>
+                            <td>{{ grade.title }}</td>
+                            <td>{{ grade.assessment_type }}</td>
+                            <td>{{ grade.score }} / {{ grade.max_score }}</td>
+                            <td>{{ grade.feedback or "-" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">No grades posted yet.</div>
+        {% endif %}
+    </section>
+{% endif %}
+
+{% if session.get("role") in ["faculty", "admin"] %}
+    <section class="panel" id="roster">
+        <h2>Section Roster</h2>
+        {% if students %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Student ID</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                        <tr>
+                            <td>{{ student.full_name }}</td>
+                            <td>{{ student.student_number }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="empty-state">No enrolled students yet.</div>
+        {% endif %}
+    </section>
+{% endif %}
+
+{% if session.get("role") == "student" and metrics %}
+    <section class="panel" id="performance">
+        <h2>Performance Snapshot</h2>
+        <div class="stats-grid">
+            <div class="stat-tile"><span class="stat-tile__label">Assignments</span><div class="stat-tile__value">{{ metrics.assignment_avg }}%</div></div>
+            <div class="stat-tile"><span class="stat-tile__label">Quizzes</span><div class="stat-tile__value">{{ metrics.quiz_avg }}%</div></div>
+            <div class="stat-tile"><span class="stat-tile__label">Exams</span><div class="stat-tile__value">{{ metrics.exam_avg }}%</div></div>
+            <div class="stat-tile"><span class="stat-tile__label">Attendance</span><div class="stat-tile__value">{{ metrics.attendance }}%</div></div>
+            <div class="stat-tile"><span class="stat-tile__label">Final Score</span><div class="stat-tile__value">{{ metrics.final_score }}%</div></div>
+        </div>
+    </section>
+{% endif %}
+{% endblock %}
