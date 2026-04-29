@@ -11,7 +11,8 @@
         <div class="hero__meta-item">{{ section.section_code }}</div>
         <div class="hero__meta-item">{{ section.term or "Current term" }}</div>
         <div class="hero__meta-item">{{ section.room_no or "Room TBD" }}</div>
-        {% if section.faculty_name %}
+        {% if section.faculty_name %}   // Only show faculty name if it's available to avoid empty meta item
+             <div class="hero__meta
             <div class="hero__meta-item">{{ section.faculty_name }}</div>
         {% endif %}
     </div>
