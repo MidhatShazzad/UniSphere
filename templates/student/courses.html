@@ -1,14 +1,11 @@
 {% extends "base_sidebar.html" %}
-
 {% block content %}
-
 <h1>My Courses</h1>
-
 {% if courses %}
-
+{# Display course cards in a responsive flex grid #}
 <div style="display:flex; gap:20px; flex-wrap:wrap;">
-
     {% for c in courses %}
+        {# Each card links to the course detail page using section_id #}
         <a href="/course/{{ c.section_id }}" style="text-decoration:none; color:black;">
             <div style="
                 border:1px solid #ccc;
@@ -23,12 +20,9 @@
             </div>
         </a>
     {% endfor %}
-
 </div>
-
-
 {% else %}
+    {# Fallback if the student has no enrollments #}
     <p>No courses enrolled.</p>
 {% endif %}
-
 {% endblock %}
